@@ -1,0 +1,39 @@
+services:
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./auth-service:/app
+      - auth-data:/app/data
+    networks:
+      - microservices-network
+    environment:
+      - JWT_SECRET=your_jwt_secret_key_here
+      - JWT_ALGORITHM=HS256
+      - JWT_EXPIRATION_MINUTES=30
+      - USER_SERVICE_URL=http://user-service:8001
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./user-service:/app
+      - user-data:/app/data
+    networks:
+      - microservices-network
+    environment:
+      - AUTH_SERVICE_URL=http://auth-service:8000
+
+networks:
+  microservices-network:
+    driver: bridge
+
+volumes:
+  auth-data:
+  user-data:
